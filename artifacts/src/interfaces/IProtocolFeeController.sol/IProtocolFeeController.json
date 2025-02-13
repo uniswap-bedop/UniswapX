@@ -1,0 +1,140 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IProtocolFeeController",
+  "sourceName": "src/interfaces/IProtocolFeeController.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "contract IReactor",
+                  "name": "reactor",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "swapper",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "nonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "deadline",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "contract IValidationCallback",
+                  "name": "additionalValidationContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "additionalValidationData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct OrderInfo",
+              "name": "info",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "contract ERC20",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "maxAmount",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct InputToken",
+              "name": "input",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                }
+              ],
+              "internalType": "struct OutputToken[]",
+              "name": "outputs",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "sig",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "hash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct ResolvedOrder",
+          "name": "order",
+          "type": "tuple"
+        }
+      ],
+      "name": "getFeeOutputs",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct OutputToken[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

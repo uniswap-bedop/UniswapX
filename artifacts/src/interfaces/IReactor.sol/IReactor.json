@@ -1,0 +1,121 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IReactor",
+  "sourceName": "src/interfaces/IReactor.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "order",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "sig",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignedOrder",
+          "name": "order",
+          "type": "tuple"
+        }
+      ],
+      "name": "execute",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "order",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "sig",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignedOrder[]",
+          "name": "orders",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "executeBatch",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "order",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "sig",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignedOrder[]",
+          "name": "orders",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "callbackData",
+          "type": "bytes"
+        }
+      ],
+      "name": "executeBatchWithCallback",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "order",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "sig",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignedOrder",
+          "name": "order",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "callbackData",
+          "type": "bytes"
+        }
+      ],
+      "name": "executeWithCallback",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
