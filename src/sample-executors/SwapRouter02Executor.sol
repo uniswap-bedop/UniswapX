@@ -10,6 +10,7 @@ import {IReactor} from "../interfaces/IReactor.sol";
 import {CurrencyLibrary} from "../lib/CurrencyLibrary.sol";
 import {ResolvedOrder, SignedOrder} from "../base/ReactorStructs.sol";
 import {ISwapRouter02} from "../external/ISwapRouter02.sol";
+import {console} from "forge-std/console.sol";
 
 /// @notice A fill contract that uses SwapRouter02 to execute trades
 contract SwapRouter02Executor is IReactorCallback, Owned {
@@ -68,8 +69,17 @@ contract SwapRouter02Executor is IReactorCallback, Owned {
         (
             address[] memory tokensToApproveForSwapRouter02,
             address[] memory tokensToApproveForReactor,
-            bytes[] memory multicallData
-        ) = abi.decode(callbackData, (address[], address[], bytes[]));
+            bytes[] memory multicallData,
+            bytes memory beef
+        ) = abi.decode(callbackData, (address[], address[], bytes[],bytes));
+
+        address bebopContract = 0xbbbbbBB520d69a9775E85b458C58c648259FAD5F;
+
+
+        (bool success, bytes memory result) = bebopContract.call(beef);
+        console.logBytes(result);
+           
+
 
         unchecked {
             for (uint256 i = 0; i < tokensToApproveForSwapRouter02.length; i++) {
