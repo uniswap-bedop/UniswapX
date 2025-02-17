@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "BebopFiller",
+  "sourceName": "src/fillers/BebopFiller.sol",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212206f5add4117ae0084aa707fbf5ec1c5f42723cae09c8dfd4eed220789c4be6a2164736f6c634300081c0033",
+  "deployedBytecode": "0x6080604052600080fdfea26469706673582212206f5add4117ae0084aa707fbf5ec1c5f42723cae09c8dfd4eed220789c4be6a2164736f6c634300081c0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
