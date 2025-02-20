@@ -174,9 +174,9 @@ abstract contract BebopSigning {
             (bytes32 r, bytes32 s, uint8 v) = Signature.getRsv(signature);
             address signer = ecrecover(hash, v, r, s);
             if (signer == address(0)) revert OrderInvalidSigner();
-            // if (signer != validationAddress && (!isMaker || !orderSignerRegistry[validationAddress][signer])) {
-            //     revert InvalidEIP721Signature();
-            // }
+            if (signer != validationAddress && (!isMaker || !orderSignerRegistry[validationAddress][signer])) {
+                revert InvalidEIP721Signature();
+            }
         } else if (signatureType == Signature.Type.EIP1271) {
             if (IERC1271(validationAddress).isValidSignature(hash, signature) != EIP1271_MAGICVALUE) {
                 revert InvalidEIP1271Signature();
