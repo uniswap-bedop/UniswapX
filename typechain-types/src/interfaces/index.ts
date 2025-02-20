@@ -3,7 +3,11 @@
 /* eslint-disable */
 export type { IArbSys } from "./IArbSys";
 export type { IBebopSettlement } from "./IBebopSettlement";
+export type { IDaiLikePermit } from "./IDaiLikePermit";
+export type { IERC20 } from "./IERC20";
+export type { IPermit2 } from "./IPermit2";
 export type { IProtocolFeeController } from "./IProtocolFeeController";
 export type { IReactor } from "./IReactor";
 export type { IReactorCallback } from "./IReactorCallback";
 export type { IValidationCallback } from "./IValidationCallback";
+export type { IWETH } from "./IWETH";

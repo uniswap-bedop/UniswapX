@@ -9,3 +9,4 @@ export * as lib from "./lib";
 export * as reactors from "./reactors";
 export * as sampleExecutors from "./sample-executors";
 export * as sampleValidationContracts from "./sample-validation-contracts";
+export * as settlement from "./settlement";

@@ -17,3 +17,5 @@ import type * as sampleExecutors from "./sample-executors";
 export type { sampleExecutors };
 import type * as sampleValidationContracts from "./sample-validation-contracts";
 export type { sampleValidationContracts };
+import type * as settlement from "./settlement";
+export type { settlement };

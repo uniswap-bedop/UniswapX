@@ -59,8 +59,12 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
         mockSwapRouter = new MockSwapRouter(address(weth));
         permit2 = IPermit2(deployPermit2());
         reactor = new DutchOrderReactor(permit2, PROTOCOL_FEE_OWNER);
-        swapRouter02Executor =
-            new SwapRouter02Executor(address(this), reactor, address(this), ISwapRouter02(address(mockSwapRouter)));
+        swapRouter02Executor = new SwapRouter02Executor(
+            address(this),
+            reactor,
+            address(this),
+            ISwapRouter02(address(mockSwapRouter))
+        );
 
         // Do appropriate max approvals
         tokenIn.forceApprove(swapper, address(permit2), type(uint256).max);
@@ -84,13 +88,23 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
             amountIn: ONE,
             amountOutMinimum: 0
         });
-        multicallData[0] = abi.encodeWithSelector(ISwapRouter02.exactInput.selector, exactInputParams);
-        bytes memory callbackData = abi.encode(tokensToApproveForSwapRouter02, tokensToApproveForReactor, multicallData);
+        multicallData[0] = abi.encodeWithSelector(
+            ISwapRouter02.exactInput.selector,
+            exactInputParams
+        );
+        bytes memory callbackData = abi.encode(
+            tokensToApproveForSwapRouter02,
+            tokensToApproveForReactor,
+            multicallData
+        );
 
         ResolvedOrder[] memory resolvedOrders = new ResolvedOrder[](1);
         bytes memory sig = hex"1234";
         resolvedOrders[0] = ResolvedOrder(
-            OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100),
+            OrderInfoBuilder
+                .init(address(reactor))
+                .withSwapper(swapper)
+                .withDeadline(block.timestamp + 100),
             InputToken(tokenIn, ONE, ONE),
             outputs,
             sig,
@@ -103,18 +117,29 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
         assertEq(tokenIn.balanceOf(address(mockSwapRouter)), ONE);
         assertEq(tokenOut.balanceOf(address(swapRouter02Executor)), ONE);
         assertEq(tokenOut.balanceOf(address(swapper)), 0);
-        assertEq(tokenOut.allowance(address(swapRouter02Executor), address(reactor)), type(uint256).max);
+        assertEq(
+            tokenOut.allowance(address(swapRouter02Executor), address(reactor)),
+            type(uint256).max
+        );
     }
 
     // Output will resolve to 0.5. Input = 1. SwapRouter exchanges at 1 to 1 rate.
     // There will be 0.5 output token remaining in SwapRouter02Executor.
     function testExecute() public {
         DutchOrder memory order = DutchOrder({
-            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100),
+            info: OrderInfoBuilder
+                .init(address(reactor))
+                .withSwapper(swapper)
+                .withDeadline(block.timestamp + 100),
             decayStartTime: block.timestamp - 100,
             decayEndTime: block.timestamp + 100,
             input: DutchInput(tokenIn, ONE, ONE),
-            outputs: OutputsBuilder.singleDutch(address(tokenOut), ONE, 0, address(swapper))
+            outputs: OutputsBuilder.singleDutch(
+                address(tokenOut),
+                ONE,
+                0,
+                address(swapper)
+            )
         });
 
         tokenIn.mint(swapper, ONE);
@@ -133,12 +158,22 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
             amountIn: ONE,
             amountOutMinimum: 0
         });
-        multicallData[0] = abi.encodeWithSelector(ISwapRouter02.exactInput.selector, exactInputParams);
+        multicallData[0] = abi.encodeWithSelector(
+            ISwapRouter02.exactInput.selector,
+            exactInputParams
+        );
 
         vm.startSnapshotGas("SwapRouter02ExecutorExecute");
         swapRouter02Executor.execute(
-            SignedOrder(abi.encode(order), signOrder(swapperPrivateKey, address(permit2), order)),
-            abi.encode(tokensToApproveForSwapRouter02, tokensToApproveForReactor, multicallData)
+            SignedOrder(
+                abi.encode(order),
+                signOrder(swapperPrivateKey, address(permit2), order)
+            ),
+            abi.encode(
+                tokensToApproveForSwapRouter02,
+                tokensToApproveForReactor,
+                multicallData
+            )
         );
         vm.stopSnapshotGas();
 
@@ -150,11 +185,19 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
 
     function testExecuteAlreadyApproved() public {
         DutchOrder memory order = DutchOrder({
-            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100),
+            info: OrderInfoBuilder
+                .init(address(reactor))
+                .withSwapper(swapper)
+                .withDeadline(block.timestamp + 100),
             decayStartTime: block.timestamp - 100,
             decayEndTime: block.timestamp + 100,
             input: DutchInput(tokenIn, ONE, ONE),
-            outputs: OutputsBuilder.singleDutch(address(tokenOut), ONE, 0, address(swapper))
+            outputs: OutputsBuilder.singleDutch(
+                address(tokenOut),
+                ONE,
+                0,
+                address(swapper)
+            )
         });
 
         tokenIn.mint(swapper, 2 * ONE);
@@ -173,21 +216,38 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
             amountIn: ONE,
             amountOutMinimum: 0
         });
-        multicallData[0] = abi.encodeWithSelector(ISwapRouter02.exactInput.selector, exactInputParams);
+        multicallData[0] = abi.encodeWithSelector(
+            ISwapRouter02.exactInput.selector,
+            exactInputParams
+        );
 
         swapRouter02Executor.execute(
-            SignedOrder(abi.encode(order), signOrder(swapperPrivateKey, address(permit2), order)),
-            abi.encode(tokensToApproveForSwapRouter02, tokensToApproveForReactor, multicallData)
+            SignedOrder(
+                abi.encode(order),
+                signOrder(swapperPrivateKey, address(permit2), order)
+            ),
+            abi.encode(
+                tokensToApproveForSwapRouter02,
+                tokensToApproveForReactor,
+                multicallData
+            )
         );
 
         DutchOrder memory order2 = DutchOrder({
-            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100).withNonce(
-                1234
-            ),
+            info: OrderInfoBuilder
+                .init(address(reactor))
+                .withSwapper(swapper)
+                .withDeadline(block.timestamp + 100)
+                .withNonce(1234),
             decayStartTime: block.timestamp - 100,
             decayEndTime: block.timestamp + 100,
             input: DutchInput(tokenIn, ONE, ONE),
-            outputs: OutputsBuilder.singleDutch(address(tokenOut), ONE, 0, address(swapper))
+            outputs: OutputsBuilder.singleDutch(
+                address(tokenOut),
+                ONE,
+                0,
+                address(swapper)
+            )
         });
 
         tokensToApproveForSwapRouter02 = new address[](0);
@@ -195,8 +255,15 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
 
         vm.startSnapshotGas("SwapRouter02ExecutorExecuteAlreadyApproved");
         swapRouter02Executor.execute(
-            SignedOrder(abi.encode(order2), signOrder(swapperPrivateKey, address(permit2), order2)),
-            abi.encode(tokensToApproveForSwapRouter02, tokensToApproveForReactor, multicallData)
+            SignedOrder(
+                abi.encode(order2),
+                signOrder(swapperPrivateKey, address(permit2), order2)
+            ),
+            abi.encode(
+                tokensToApproveForSwapRouter02,
+                tokensToApproveForReactor,
+                multicallData
+            )
         );
         vm.stopSnapshotGas();
 
@@ -210,12 +277,20 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
     // there will be an overflow error when reactor tries to transfer 2 outputToken out of fill contract.
     function testExecuteInsufficientOutput() public {
         DutchOrder memory order = DutchOrder({
-            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100),
+            info: OrderInfoBuilder
+                .init(address(reactor))
+                .withSwapper(swapper)
+                .withDeadline(block.timestamp + 100),
             decayStartTime: block.timestamp - 100,
             decayEndTime: block.timestamp + 100,
             input: DutchInput(tokenIn, ONE, ONE),
             // The output will resolve to 2
-            outputs: OutputsBuilder.singleDutch(address(tokenOut), ONE * 2, ONE * 2, address(swapper))
+            outputs: OutputsBuilder.singleDutch(
+                address(tokenOut),
+                ONE * 2,
+                ONE * 2,
+                address(swapper)
+            )
         });
 
         tokenIn.mint(swapper, ONE);
@@ -234,12 +309,22 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
             amountIn: ONE,
             amountOutMinimum: 0
         });
-        multicallData[0] = abi.encodeWithSelector(ISwapRouter02.exactInput.selector, exactInputParams);
+        multicallData[0] = abi.encodeWithSelector(
+            ISwapRouter02.exactInput.selector,
+            exactInputParams
+        );
 
         vm.expectRevert("TRANSFER_FROM_FAILED");
         swapRouter02Executor.execute(
-            SignedOrder(abi.encode(order), signOrder(swapperPrivateKey, address(permit2), order)),
-            abi.encode(tokensToApproveForSwapRouter02, tokensToApproveForReactor, multicallData)
+            SignedOrder(
+                abi.encode(order),
+                signOrder(swapperPrivateKey, address(permit2), order)
+            ),
+            abi.encode(
+                tokensToApproveForSwapRouter02,
+                tokensToApproveForReactor,
+                multicallData
+            )
         );
     }
 
@@ -257,25 +342,48 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
 
         SignedOrder[] memory signedOrders = new SignedOrder[](2);
         DutchOrder memory order1 = DutchOrder({
-            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100),
+            info: OrderInfoBuilder
+                .init(address(reactor))
+                .withSwapper(swapper)
+                .withDeadline(block.timestamp + 100),
             decayStartTime: block.timestamp,
             decayEndTime: block.timestamp + 100,
             input: DutchInput(tokenIn, inputAmount, inputAmount),
-            outputs: OutputsBuilder.singleDutch(address(tokenOut), outputAmount, outputAmount, swapper)
+            outputs: OutputsBuilder.singleDutch(
+                address(tokenOut),
+                outputAmount,
+                outputAmount,
+                swapper
+            )
         });
-        bytes memory sig1 = signOrder(swapperPrivateKey, address(permit2), order1);
+        bytes memory sig1 = signOrder(
+            swapperPrivateKey,
+            address(permit2),
+            order1
+        );
         signedOrders[0] = SignedOrder(abi.encode(order1), sig1);
 
         DutchOrder memory order2 = DutchOrder({
-            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100).withNonce(
-                1
-            ),
+            info: OrderInfoBuilder
+                .init(address(reactor))
+                .withSwapper(swapper)
+                .withDeadline(block.timestamp + 100)
+                .withNonce(1),
             decayStartTime: block.timestamp,
             decayEndTime: block.timestamp + 100,
             input: DutchInput(tokenIn, inputAmount * 3, inputAmount * 3),
-            outputs: OutputsBuilder.singleDutch(address(tokenOut), outputAmount * 2, outputAmount * 2, swapper)
+            outputs: OutputsBuilder.singleDutch(
+                address(tokenOut),
+                outputAmount * 2,
+                outputAmount * 2,
+                swapper
+            )
         });
-        bytes memory sig2 = signOrder(swapperPrivateKey, address(permit2), order2);
+        bytes memory sig2 = signOrder(
+            swapperPrivateKey,
+            address(permit2),
+            order2
+        );
         signedOrders[1] = SignedOrder(abi.encode(order2), sig2);
 
         address[] memory tokensToApproveForSwapRouter02 = new address[](1);
@@ -291,10 +399,18 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
             amountIn: inputAmount * 4,
             amountOutMinimum: 0
         });
-        multicallData[0] = abi.encodeWithSelector(ISwapRouter02.exactInput.selector, exactInputParams);
+        multicallData[0] = abi.encodeWithSelector(
+            ISwapRouter02.exactInput.selector,
+            exactInputParams
+        );
 
         swapRouter02Executor.executeBatch(
-            signedOrders, abi.encode(tokensToApproveForSwapRouter02, tokensToApproveForReactor, multicallData)
+            signedOrders,
+            abi.encode(
+                tokensToApproveForSwapRouter02,
+                tokensToApproveForReactor,
+                multicallData
+            )
         );
         assertEq(tokenOut.balanceOf(swapper), 3 ether);
         assertEq(tokenIn.balanceOf(swapper), 6 ether);
@@ -306,11 +422,19 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
 
     function testNotWhitelistedCaller() public {
         DutchOrder memory order = DutchOrder({
-            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100),
+            info: OrderInfoBuilder
+                .init(address(reactor))
+                .withSwapper(swapper)
+                .withDeadline(block.timestamp + 100),
             decayStartTime: block.timestamp - 100,
             decayEndTime: block.timestamp + 100,
             input: DutchInput(tokenIn, ONE, ONE),
-            outputs: OutputsBuilder.singleDutch(address(tokenOut), ONE, 0, address(swapper))
+            outputs: OutputsBuilder.singleDutch(
+                address(tokenOut),
+                ONE,
+                0,
+                address(swapper)
+            )
         });
 
         tokenIn.mint(swapper, ONE);
@@ -326,12 +450,18 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
             amountIn: ONE,
             amountOutMinimum: 0
         });
-        multicallData[0] = abi.encodeWithSelector(ISwapRouter02.exactInput.selector, exactInputParams);
+        multicallData[0] = abi.encodeWithSelector(
+            ISwapRouter02.exactInput.selector,
+            exactInputParams
+        );
 
         vm.prank(address(0xbeef));
         vm.expectRevert(SwapRouter02Executor.CallerNotWhitelisted.selector);
         swapRouter02Executor.execute(
-            SignedOrder(abi.encode(order), signOrder(swapperPrivateKey, address(permit2), order)),
+            SignedOrder(
+                abi.encode(order),
+                signOrder(swapperPrivateKey, address(permit2), order)
+            ),
             abi.encode(tokensToApproveForSwapRouter02, multicallData)
         );
     }
@@ -351,13 +481,22 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
             amountIn: ONE,
             amountOutMinimum: 0
         });
-        multicallData[0] = abi.encodeWithSelector(ISwapRouter02.exactInput.selector, exactInputParams);
-        bytes memory callbackData = abi.encode(tokensToApproveForSwapRouter02, multicallData);
+        multicallData[0] = abi.encodeWithSelector(
+            ISwapRouter02.exactInput.selector,
+            exactInputParams
+        );
+        bytes memory callbackData = abi.encode(
+            tokensToApproveForSwapRouter02,
+            multicallData
+        );
 
         ResolvedOrder[] memory resolvedOrders = new ResolvedOrder[](1);
         bytes memory sig = hex"1234";
         resolvedOrders[0] = ResolvedOrder(
-            OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100),
+            OrderInfoBuilder
+                .init(address(reactor))
+                .withSwapper(swapper)
+                .withDeadline(block.timestamp + 100),
             InputToken(tokenIn, ONE, ONE),
             outputs,
             sig,

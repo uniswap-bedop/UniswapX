@@ -14,6 +14,18 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "IERC1271",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC1271__factory>;
+    getContractFactory(
+      name: "IERC20Permit",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Permit__factory>;
+    getContractFactory(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20__factory>;
+    getContractFactory(
       name: "IAllowanceTransfer",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IAllowanceTransfer__factory>;
@@ -41,6 +53,18 @@ declare module "hardhat/types/runtime" {
       name: "WETH",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WETH__factory>;
+    getContractFactory(
+      name: "BebopPartner",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BebopPartner__factory>;
+    getContractFactory(
+      name: "BebopSigning",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BebopSigning__factory>;
+    getContractFactory(
+      name: "BebopTransfer",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BebopTransfer__factory>;
     getContractFactory(
       name: "BlockNumberish",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -70,6 +94,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IBebopSettlement__factory>;
     getContractFactory(
+      name: "IDaiLikePermit",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IDaiLikePermit__factory>;
+    getContractFactory(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20__factory>;
+    getContractFactory(
+      name: "IPermit2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPermit2__factory>;
+    getContractFactory(
       name: "IProtocolFeeController",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IProtocolFeeController__factory>;
@@ -86,9 +122,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IValidationCallback__factory>;
     getContractFactory(
+      name: "IWETH",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IWETH__factory>;
+    getContractFactory(
       name: "OrderQuoter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OrderQuoter__factory>;
+    getContractFactory(
+      name: "SafeCast160",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SafeCast160__factory>;
     getContractFactory(
       name: "CosignerLib",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -154,6 +198,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SwapRouter02Executor__factory>;
     getContractFactory(
+      name: "SwapRouter02ExecutorNew",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SwapRouter02ExecutorNew__factory>;
+    getContractFactory(
       name: "UniversalRouterExecutor",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniversalRouterExecutor__factory>;
@@ -161,7 +209,26 @@ declare module "hardhat/types/runtime" {
       name: "ExclusiveFillerValidation",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ExclusiveFillerValidation__factory>;
+    getContractFactory(
+      name: "BebopSettlement",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BebopSettlement__factory>;
 
+    getContractAt(
+      name: "IERC1271",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC1271>;
+    getContractAt(
+      name: "IERC20Permit",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Permit>;
+    getContractAt(
+      name: "IERC20",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20>;
     getContractAt(
       name: "IAllowanceTransfer",
       address: string | ethers.Addressable,
@@ -198,6 +265,21 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.WETH>;
     getContractAt(
+      name: "BebopPartner",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BebopPartner>;
+    getContractAt(
+      name: "BebopSigning",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BebopSigning>;
+    getContractAt(
+      name: "BebopTransfer",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BebopTransfer>;
+    getContractAt(
       name: "BlockNumberish",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -233,6 +315,21 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IBebopSettlement>;
     getContractAt(
+      name: "IDaiLikePermit",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IDaiLikePermit>;
+    getContractAt(
+      name: "IERC20",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20>;
+    getContractAt(
+      name: "IPermit2",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPermit2>;
+    getContractAt(
       name: "IProtocolFeeController",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -253,10 +350,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IValidationCallback>;
     getContractAt(
+      name: "IWETH",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IWETH>;
+    getContractAt(
       name: "OrderQuoter",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.OrderQuoter>;
+    getContractAt(
+      name: "SafeCast160",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SafeCast160>;
     getContractAt(
       name: "CosignerLib",
       address: string | ethers.Addressable,
@@ -338,6 +445,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.SwapRouter02Executor>;
     getContractAt(
+      name: "SwapRouter02ExecutorNew",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SwapRouter02ExecutorNew>;
+    getContractAt(
       name: "UniversalRouterExecutor",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -347,7 +459,24 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.ExclusiveFillerValidation>;
+    getContractAt(
+      name: "BebopSettlement",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BebopSettlement>;
 
+    deployContract(
+      name: "IERC1271",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC1271>;
+    deployContract(
+      name: "IERC20Permit",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Permit>;
+    deployContract(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20>;
     deployContract(
       name: "IAllowanceTransfer",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -377,6 +506,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WETH>;
     deployContract(
+      name: "BebopPartner",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BebopPartner>;
+    deployContract(
+      name: "BebopSigning",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BebopSigning>;
+    deployContract(
+      name: "BebopTransfer",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BebopTransfer>;
+    deployContract(
       name: "BlockNumberish",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BlockNumberish>;
@@ -405,6 +546,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IBebopSettlement>;
     deployContract(
+      name: "IDaiLikePermit",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IDaiLikePermit>;
+    deployContract(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20>;
+    deployContract(
+      name: "IPermit2",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPermit2>;
+    deployContract(
       name: "IProtocolFeeController",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IProtocolFeeController>;
@@ -421,9 +574,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IValidationCallback>;
     deployContract(
+      name: "IWETH",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IWETH>;
+    deployContract(
       name: "OrderQuoter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.OrderQuoter>;
+    deployContract(
+      name: "SafeCast160",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SafeCast160>;
     deployContract(
       name: "CosignerLib",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -489,6 +650,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SwapRouter02Executor>;
     deployContract(
+      name: "SwapRouter02ExecutorNew",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SwapRouter02ExecutorNew>;
+    deployContract(
       name: "UniversalRouterExecutor",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniversalRouterExecutor>;
@@ -496,7 +661,26 @@ declare module "hardhat/types/runtime" {
       name: "ExclusiveFillerValidation",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ExclusiveFillerValidation>;
+    deployContract(
+      name: "BebopSettlement",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BebopSettlement>;
 
+    deployContract(
+      name: "IERC1271",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC1271>;
+    deployContract(
+      name: "IERC20Permit",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Permit>;
+    deployContract(
+      name: "IERC20",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20>;
     deployContract(
       name: "IAllowanceTransfer",
       args: any[],
@@ -533,6 +717,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WETH>;
     deployContract(
+      name: "BebopPartner",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BebopPartner>;
+    deployContract(
+      name: "BebopSigning",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BebopSigning>;
+    deployContract(
+      name: "BebopTransfer",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BebopTransfer>;
+    deployContract(
       name: "BlockNumberish",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -568,6 +767,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IBebopSettlement>;
     deployContract(
+      name: "IDaiLikePermit",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IDaiLikePermit>;
+    deployContract(
+      name: "IERC20",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20>;
+    deployContract(
+      name: "IPermit2",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPermit2>;
+    deployContract(
       name: "IProtocolFeeController",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -588,10 +802,20 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IValidationCallback>;
     deployContract(
+      name: "IWETH",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IWETH>;
+    deployContract(
       name: "OrderQuoter",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.OrderQuoter>;
+    deployContract(
+      name: "SafeCast160",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SafeCast160>;
     deployContract(
       name: "CosignerLib",
       args: any[],
@@ -673,6 +897,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SwapRouter02Executor>;
     deployContract(
+      name: "SwapRouter02ExecutorNew",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SwapRouter02ExecutorNew>;
+    deployContract(
       name: "UniversalRouterExecutor",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -682,6 +911,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ExclusiveFillerValidation>;
+    deployContract(
+      name: "BebopSettlement",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BebopSettlement>;
 
     // default types
     getContractFactory(

@@ -4,4 +4,5 @@
 export type { BebopExecutor } from "./BebopExecutor";
 export type { MultiFillerSwapRouter02Executor } from "./MultiFillerSwapRouter02Executor";
 export type { SwapRouter02Executor } from "./SwapRouter02Executor";
+export type { SwapRouter02ExecutorNew } from "./SwapRouter02ExecutorNew";
 export type { UniversalRouterExecutor } from "./UniversalRouterExecutor";

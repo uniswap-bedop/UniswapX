@@ -3,7 +3,11 @@
 /* eslint-disable */
 export { IArbSys__factory } from "./IArbSys__factory";
 export { IBebopSettlement__factory } from "./IBebopSettlement__factory";
+export { IDaiLikePermit__factory } from "./IDaiLikePermit__factory";
+export { IERC20__factory } from "./IERC20__factory";
+export { IPermit2__factory } from "./IPermit2__factory";
 export { IProtocolFeeController__factory } from "./IProtocolFeeController__factory";
 export { IReactor__factory } from "./IReactor__factory";
 export { IReactorCallback__factory } from "./IReactorCallback__factory";
 export { IValidationCallback__factory } from "./IValidationCallback__factory";
+export { IWETH__factory } from "./IWETH__factory";

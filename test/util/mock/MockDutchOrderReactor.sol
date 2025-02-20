@@ -5,13 +5,20 @@ import {DutchOrderReactor, ResolvedOrder, SignedOrder} from "../../../src/reacto
 import {IPermit2} from "permit2/src/interfaces/IPermit2.sol";
 
 contract MockDutchOrderReactor is DutchOrderReactor {
-    constructor(IPermit2 _permit2, address _protocolFeeOwner) DutchOrderReactor(_permit2, _protocolFeeOwner) {}
+    constructor(
+        IPermit2 _permit2,
+        address _protocolFeeOwner
+    ) DutchOrderReactor(_permit2, _protocolFeeOwner) {}
 
-    function resolveOrder(SignedOrder calldata order) external view returns (ResolvedOrder memory resolvedOrder) {
+    function resolveOrder(
+        SignedOrder calldata order
+    ) external view returns (ResolvedOrder memory resolvedOrder) {
         return _resolve(order);
     }
 
-    function _resolve(SignedOrder calldata order) internal view override returns (ResolvedOrder memory resolvedOrder) {
+    function _resolve(
+        SignedOrder calldata order
+    ) internal view override returns (ResolvedOrder memory resolvedOrder) {
         return DutchOrderReactor._resolve(order);
     }
 }

@@ -4,4 +4,5 @@
 export { BebopExecutor__factory } from "./BebopExecutor__factory";
 export { MultiFillerSwapRouter02Executor__factory } from "./MultiFillerSwapRouter02Executor__factory";
 export { SwapRouter02Executor__factory } from "./SwapRouter02Executor__factory";
+export { SwapRouter02ExecutorNew__factory } from "./SwapRouter02ExecutorNew__factory";
 export { UniversalRouterExecutor__factory } from "./UniversalRouterExecutor__factory";
