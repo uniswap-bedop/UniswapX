@@ -48,7 +48,7 @@ contract SwapRouter02ExecutorNewTest is Test, PermitSignature, DeployPermit2 {
     address constant PROTOCOL_FEE_OWNER = address(80085);
 
     function setUp() public {
-        vm.warp(1000);
+        //vm.warp(1000);
         // Mock input/output tokens
         tokenIn = new MockERC20('Input', 'IN', 18);
         tokenOut = new MockERC20('Output', 'OUT', 18);
@@ -94,12 +94,12 @@ contract SwapRouter02ExecutorNewTest is Test, PermitSignature, DeployPermit2 {
         address makerAddress = vm.addr(makerPrivateKey);
 
         Order.Single memory order;
-        order.expiry = 1739922415;
+        order.expiry = block.timestamp + 1000;
         order.taker_address = address(swapRouter02ExecutorNew);
         order.taker_token = address(weth);
-        order.maker_address = address(new ERC1271WalletMock(0x2c215B0f9df51652570694500Bfc444D81252E02));
+        order.maker_address = 0x82637ed11beef09e7008bd982aa99d54bbb42613cb3d05319350cff813f61e34;
         order.maker_token = address(tokenOut);
-        order.taker_amount = 1000000000000000;
+        order.taker_amount = 1 ether;
         order.maker_amount = 2710600;
         order.maker_nonce = 1738726891508;
         address receiver = vm.addr(1);
@@ -128,7 +128,7 @@ contract SwapRouter02ExecutorNewTest is Test, PermitSignature, DeployPermit2 {
         makerSigx.signatureBytes = abi.encodePacked(r, s, v);
 
         makerSigx.flags = 1;
-        bytes memory callbackData = abi.encode(tokenIn, tokenOut, order, makerSigx, 1);
+        bytes memory callbackData = abi.encode(tokenIn, tokenOut, order, makerSigx, 0);
 
         vm.prank(address(swapRouter02ExecutorNew));
         weth.approve(address(swapRouter02ExecutorNew), type(uint256).max);

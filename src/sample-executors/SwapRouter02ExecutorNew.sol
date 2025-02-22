@@ -90,7 +90,7 @@ contract SwapRouter02ExecutorNew is IReactorCallback, Owned {
             weth.deposit{ value: order.taker_amount }();
         }
 
-        bebop.swapSingle(order, makerSigx, filledTakerAmount);
+        bebop.swapSingle(order, makerSigx, 0);
 
         // if (tokenOut == address(0)) {
         //     weth.withdraw(weth.balanceOf(address(this)));
