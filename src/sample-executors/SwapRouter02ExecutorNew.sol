@@ -92,12 +92,12 @@ contract SwapRouter02ExecutorNew is IReactorCallback, Owned {
 
         bebop.swapSingle(order, makerSigx, filledTakerAmount);
 
-        if (tokenOut == address(0)) {
-            weth.withdraw(weth.balanceOf(address(this)));
-            CurrencyLibrary.transferNative(address(reactor), order.maker_amount);
-        } else {
-            ERC20(tokenOut).approve(address(reactor), order.maker_amount);
-        }
+        // if (tokenOut == address(0)) {
+        //     weth.withdraw(weth.balanceOf(address(this)));
+        //     CurrencyLibrary.transferNative(address(reactor), order.maker_amount);
+        // } else {
+        //     ERC20(tokenOut).approve(address(reactor), order.maker_amount);
+        // }
 
         // if (tokenIn == address(0)) {
         //     uint256 leftoverETH = address(this).balance;

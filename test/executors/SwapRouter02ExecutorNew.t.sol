@@ -23,8 +23,10 @@ import { Order } from '../../src/lib/Order.sol';
 import { ResolvedOrder } from '../../src/base/ReactorStructs.sol';
 import { Signature } from '../../src/lib/Signature.sol';
 import { BebopSettlement } from '../../src/settlement/BebopSettlement.sol';
+import { ERC1271WalletMock } from 'permit2/lib/openzeppelin-contracts/contracts/mocks/ERC1271WalletMock.sol';
+import 'lib/openzeppelin-contracts/contracts/interfaces/IERC1271.sol';
 
-contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
+contract SwapRouter02ExecutorNewTest is Test, PermitSignature, DeployPermit2 {
     address internal owner;
     address internal whitelisted;
     address internal nonWhitelisted;
@@ -41,12 +43,12 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
     DutchOrderReactor reactor;
     IPermit2 permit2;
     BebopSettlement internal bebopTest;
+    ERC1271WalletMock internal erc1271WalletMock;
 
     address constant PROTOCOL_FEE_OWNER = address(80085);
 
     function setUp() public {
         vm.warp(1000);
-
         // Mock input/output tokens
         tokenIn = new MockERC20('Input', 'IN', 18);
         tokenOut = new MockERC20('Output', 'OUT', 18);
@@ -81,35 +83,57 @@ contract SwapRouter02ExecutorTest is Test, PermitSignature, DeployPermit2 {
     }
 
     function testReactorCallback() public {
-        uint256 inputAmount = 10 ** 18;
+        uint256 inputAmount = 1;
         uint256 outputAmount = inputAmount;
 
-        tokenIn.mint(address(swapper), inputAmount * 10);
-        tokenOut.mint(address(mockSwapRouter), outputAmount * 10);
-        tokenIn.forceApprove(swapper, address(permit2), type(uint256).max);
+        tokenIn.mint(address(swapRouter02ExecutorNew), inputAmount * 10);
+        tokenOut.mint(address(swapRouter02ExecutorNew), outputAmount * 10);
+        weth.deposit{ value: 1 ether }();
+
+        uint256 makerPrivateKey = 0x1234123412341234123412341234123412341234123412341234123412341234;
+        address makerAddress = vm.addr(makerPrivateKey);
 
         Order.Single memory order;
         order.expiry = 1739922415;
         order.taker_address = address(swapRouter02ExecutorNew);
-        order.taker_token = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
-        order.maker_address = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
-        order.maker_token = address(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
-        order.taker_amount = inputAmount;
-        order.maker_amount = inputAmount * 2;
+        order.taker_token = address(weth);
+        order.maker_address = address(new ERC1271WalletMock(0x2c215B0f9df51652570694500Bfc444D81252E02));
+        order.maker_token = address(tokenOut);
+        order.taker_amount = 1000000000000000;
+        order.maker_amount = 2710600;
         order.maker_nonce = 1738726891508;
-        order.receiver = address(0x70997970C51812dc3A010C7d01b50e0d17dc79C8);
+        address receiver = vm.addr(1);
+        order.receiver = address(swapRouter02ExecutorNew);
+
+        weth.approve(address(swapRouter02ExecutorNew), type(uint256).max);
+        weth.approve(address(order.receiver), type(uint256).max);
+
+        tokenIn.forceApprove(address(swapRouter02ExecutorNew), order.receiver, type(uint256).max);
+        tokenOut.forceApprove(address(swapRouter02ExecutorNew), order.receiver, type(uint256).max);
+
+        tokenOut.mint(order.taker_address, 10 ** 18);
+        tokenOut.mint(order.maker_address, 10 ** 18);
+        weth.deposit{ value: 1 ether }();
+        weth.transfer(address(order.receiver), 1 ether);
+        vm.deal(address(weth), 1 ether);
+        deal(address(weth), address(swapRouter02ExecutorNew), 10 ** 18);
 
         tokenIn.mint(address(swapRouter02ExecutorNew), 10 ** 18);
         tokenOut.mint(address(mockSwapRouter), 10 ** 18);
         ResolvedOrder[] memory resolvedOrders = new ResolvedOrder[](0);
-        Signature.MakerSignature memory makerSigx;
-        makerSigx
-            .signatureBytes = hex'4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c';
+        bytes32 orderHash = keccak256(abi.encode(order));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(makerPrivateKey, orderHash);
 
-        bytes memory callbackData = abi.encode(tokenIn, tokenOut, order, makerSigx, 10 ** 18);
+        Signature.MakerSignature memory makerSigx;
+        makerSigx.signatureBytes = abi.encodePacked(r, s, v);
+
+        makerSigx.flags = 1;
+        bytes memory callbackData = abi.encode(tokenIn, tokenOut, order, makerSigx, 1);
+
+        vm.prank(address(swapRouter02ExecutorNew));
+        weth.approve(address(swapRouter02ExecutorNew), type(uint256).max);
 
         vm.prank(address(reactor));
-
         swapRouter02ExecutorNew.reactorCallback(resolvedOrders, callbackData);
 
         assertEq(tokenIn.balanceOf(address(swapRouter02ExecutorNew)), 10 ** 18);
