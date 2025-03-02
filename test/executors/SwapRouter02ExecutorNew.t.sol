@@ -20,13 +20,19 @@ import { DutchOrderReactor } from '../../src/reactors/DutchOrderReactor.sol';
 import { DeployPermit2 } from '../util/DeployPermit2.sol';
 import { ISwapRouter02 } from '../../src/external/ISwapRouter02.sol';
 import { Order } from '../../src/lib/Order.sol';
-import { ResolvedOrder } from '../../src/base/ReactorStructs.sol';
+import { ResolvedOrder, OrderInfo, SignedOrder } from '../../src/base/ReactorStructs.sol';
 import { Signature } from '../../src/lib/Signature.sol';
 import { BebopSettlement } from '../../src/settlement/BebopSettlement.sol';
 import { ERC1271WalletMock } from 'permit2/lib/openzeppelin-contracts/contracts/mocks/ERC1271WalletMock.sol';
 import 'lib/openzeppelin-contracts/contracts/interfaces/IERC1271.sol';
+import { ExclusiveDutchOrder, DutchOutput, DutchInput } from '../../src/reactors/ExclusiveDutchOrderReactor.sol';
+import { OrderInfoBuilder } from '../util/OrderInfoBuilder.sol';
+import { OutputsBuilder } from '../util/OutputsBuilder.sol';
+import { ExclusiveDutchOrderReactor, ExclusiveDutchOrder, ResolvedOrder, DutchOutput, DutchInput, BaseReactor } from '../../src/reactors/ExclusiveDutchOrderReactor.sol';
 
 contract SwapRouter02ExecutorNewTest is Test, PermitSignature, DeployPermit2 {
+    using OrderInfoBuilder for OrderInfo;
+
     address internal owner;
     address internal whitelisted;
     address internal nonWhitelisted;
@@ -40,15 +46,18 @@ contract SwapRouter02ExecutorNewTest is Test, PermitSignature, DeployPermit2 {
     address swapper;
     SwapRouter02ExecutorNew swapRouter02ExecutorNew;
     MockSwapRouter mockSwapRouter;
-    DutchOrderReactor reactor;
+    ExclusiveDutchOrderReactor reactor;
     IPermit2 permit2;
     BebopSettlement internal bebopTest;
     ERC1271WalletMock internal erc1271WalletMock;
 
     address constant PROTOCOL_FEE_OWNER = address(80085);
 
+    // to test sweeping ETH
+    receive() external payable {}
+
     function setUp() public {
-        //vm.warp(1000);
+        vm.warp(1000);
         // Mock input/output tokens
         tokenIn = new MockERC20('Input', 'IN', 18);
         tokenOut = new MockERC20('Output', 'OUT', 18);
@@ -63,9 +72,12 @@ contract SwapRouter02ExecutorNewTest is Test, PermitSignature, DeployPermit2 {
         // Instantiate relevant contracts
         mockSwapRouter = new MockSwapRouter(address(weth));
         permit2 = IPermit2(deployPermit2());
-        reactor = new DutchOrderReactor(permit2, PROTOCOL_FEE_OWNER);
+        reactor = new ExclusiveDutchOrderReactor(permit2, PROTOCOL_FEE_OWNER);
+        tokenIn.approve(address(permit2), 2);
+        tokenOut.approve(address(permit2), type(uint256).max);
+
         bebopTest = new BebopSettlement(
-            address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2),
+            address(weth),
             address(permit2),
             address(0x6B175474E89094C44Da98b954EedeAC495271d0F)
         );
@@ -79,63 +91,176 @@ contract SwapRouter02ExecutorNewTest is Test, PermitSignature, DeployPermit2 {
         );
 
         // Do appropriate max approvals
+        tokenIn.forceApprove(address(swapRouter02ExecutorNew), address(reactor), type(uint256).max);
+        tokenOut.forceApprove(address(swapRouter02ExecutorNew), address(swapRouter02ExecutorNew), type(uint256).max);
         tokenIn.forceApprove(swapper, address(permit2), type(uint256).max);
+    }
+
+    function testPermit() public {
+        address owner = vm.addr(1);
+        address spender = address(this); // Contract that will spend tokens
+        uint256 value = 1000 ether; // Amount to approve
+        uint256 deadline = block.timestamp + 1 hours; // Expiration time
+
+        // Compute the hash that needs to be signed
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                '\x19\x01',
+                tokenIn.DOMAIN_SEPARATOR(),
+                keccak256(
+                    abi.encode(
+                        keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)'),
+                        owner,
+                        spender,
+                        value,
+                        tokenIn.nonces(owner),
+                        deadline
+                    )
+                )
+            )
+        );
+
+        // Sign the digest with the maker's private key (off-chain signer)
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+        tokenIn.permit(owner, spender, value, deadline, v, r, s);
+
+        // bebopTest calls permit() with the signed data
+        assertEq(tokenIn.allowance(owner, spender), value);
+    }
+
+    function createProfitableBebopOrder() public returns (bytes memory) {
+        uint256 makerPrivateKey = 0x1234123412341234123412341234123412341234123412341234123412341234;
+        address makerAddress = vm.addr(makerPrivateKey);
+
+        Order.Single memory order = Order.Single({
+            expiry: block.timestamp + 1000,
+            taker_address: address(swapRouter02ExecutorNew),
+            taker_token: address(tokenOut),
+            maker_address: payable(address(new ERC1271WalletMock(0xbA7C9B94632420262CD7fcD80619A9701DFcAc7A))),
+            maker_token: address(tokenIn),
+            taker_amount: 10860,
+            maker_amount: 2710600,
+            maker_nonce: 1738726891508,
+            receiver: payable(address(swapRouter02ExecutorNew)),
+            flags: 0,
+            packed_commands: 0
+        });
+
+        tokenIn.mint(order.maker_address, 10 ** 18);
+        tokenOut.mint(order.taker_address, 10 ** 15);
+        tokenOut.forceApprove(order.taker_address, address(bebopTest), type(uint256).max);
+        tokenIn.forceApprove(order.maker_address, address(bebopTest), type(uint256).max);
+        // Approvals
+        tokenIn.approve(order.taker_address, type(uint256).max);
+
+        bytes32 orderHash = keccak256(abi.encode(order));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(makerPrivateKey, orderHash);
+
+        Signature.MakerSignature memory makerSigx = Signature.MakerSignature({
+            signatureBytes: abi.encodePacked(r, s, v),
+            flags: 1
+        });
+
+        bytes memory callbackData = abi.encode(tokenIn, tokenOut, order, makerSigx, 0);
+
+        return callbackData;
     }
 
     function testReactorCallback() public {
         uint256 inputAmount = 1;
         uint256 outputAmount = inputAmount;
 
-        tokenIn.mint(address(swapRouter02ExecutorNew), inputAmount * 10);
-        tokenOut.mint(address(swapRouter02ExecutorNew), outputAmount * 10);
-        weth.deposit{ value: 1 ether }();
-
         uint256 makerPrivateKey = 0x1234123412341234123412341234123412341234123412341234123412341234;
         address makerAddress = vm.addr(makerPrivateKey);
 
-        Order.Single memory order;
-        order.expiry = block.timestamp + 1000;
-        order.taker_address = address(swapRouter02ExecutorNew);
-        order.taker_token = address(weth);
-        order.maker_address = 0x82637ed11beef09e7008bd982aa99d54bbb42613cb3d05319350cff813f61e34;
-        order.maker_token = address(tokenOut);
-        order.taker_amount = 1 ether;
-        order.maker_amount = 2710600;
-        order.maker_nonce = 1738726891508;
-        address receiver = vm.addr(1);
-        order.receiver = address(swapRouter02ExecutorNew);
+        Order.Single memory order = Order.Single({
+            expiry: block.timestamp + 1000,
+            taker_address: address(swapRouter02ExecutorNew),
+            taker_token: address(tokenOut),
+            maker_address: payable(address(new ERC1271WalletMock(0xc26D012184eBd826BA1A0f8FcEF059e78868D182))),
+            maker_token: address(tokenIn),
+            taker_amount: 10 ** 15,
+            maker_amount: 2710600,
+            maker_nonce: 1738726891508,
+            receiver: payable(address(swapRouter02ExecutorNew)),
+            flags: 0,
+            packed_commands: 0
+        });
 
-        weth.approve(address(swapRouter02ExecutorNew), type(uint256).max);
-        weth.approve(address(order.receiver), type(uint256).max);
+        // Mint tokens
+        tokenIn.mint(order.maker_address, 10 ** 18);
+        tokenOut.mint(order.taker_address, 10 ** 15);
 
-        tokenIn.forceApprove(address(swapRouter02ExecutorNew), order.receiver, type(uint256).max);
-        tokenOut.forceApprove(address(swapRouter02ExecutorNew), order.receiver, type(uint256).max);
+        // Approvals
+        tokenIn.approve(order.taker_address, type(uint256).max);
+        tokenIn.approve(address(this), type(uint256).max);
+        tokenOut.approve(address(this), type(uint256).max);
+        tokenOut.forceApprove(order.taker_address, address(bebopTest), type(uint256).max);
+        tokenIn.forceApprove(order.maker_address, address(bebopTest), type(uint256).max);
 
-        tokenOut.mint(order.taker_address, 10 ** 18);
-        tokenOut.mint(order.maker_address, 10 ** 18);
-        weth.deposit{ value: 1 ether }();
-        weth.transfer(address(order.receiver), 1 ether);
-        vm.deal(address(weth), 1 ether);
-        deal(address(weth), address(swapRouter02ExecutorNew), 10 ** 18);
+        // Capture balances before swap
+        uint256 makerTokenInBefore = tokenIn.balanceOf(order.maker_address);
+        uint256 takerTokenInBefore = tokenIn.balanceOf(order.taker_address);
 
-        tokenIn.mint(address(swapRouter02ExecutorNew), 10 ** 18);
-        tokenOut.mint(address(mockSwapRouter), 10 ** 18);
+        console.log('Before Swap:');
+        console.log('Maker TokenIn Balance:', makerTokenInBefore);
+        console.log('Taker TokenIn Balance:', takerTokenInBefore);
+
         ResolvedOrder[] memory resolvedOrders = new ResolvedOrder[](0);
         bytes32 orderHash = keccak256(abi.encode(order));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(makerPrivateKey, orderHash);
 
-        Signature.MakerSignature memory makerSigx;
-        makerSigx.signatureBytes = abi.encodePacked(r, s, v);
+        Signature.MakerSignature memory makerSigx = Signature.MakerSignature({
+            signatureBytes: abi.encodePacked(r, s, v),
+            flags: 1
+        });
 
-        makerSigx.flags = 1;
         bytes memory callbackData = abi.encode(tokenIn, tokenOut, order, makerSigx, 0);
-
-        vm.prank(address(swapRouter02ExecutorNew));
-        weth.approve(address(swapRouter02ExecutorNew), type(uint256).max);
 
         vm.prank(address(reactor));
         swapRouter02ExecutorNew.reactorCallback(resolvedOrders, callbackData);
 
-        assertEq(tokenIn.balanceOf(address(swapRouter02ExecutorNew)), 10 ** 18);
+        assertEq(tokenIn.balanceOf(order.maker_address), (10 ** 18) - 2710600);
+        assertEq(tokenOut.balanceOf(order.maker_address), 10 ** 15);
+        assertEq(tokenIn.balanceOf(order.taker_address), 2710600);
+        assertEq(tokenOut.balanceOf(order.taker_address), 0);
+    }
+
+    function testExclusiveDutchOrderLessThanBebop() public {
+        uint256 amountIn = 10245;
+        uint256 amountOut = 600;
+        address recipient = payable(address(new ERC1271WalletMock(0xc26D012184eBd826BA1A0f8FcEF059e78868D182)));
+        tokenIn.mint(swapper, 1 ether);
+
+        ExclusiveDutchOrder memory order = ExclusiveDutchOrder({
+            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100),
+            decayStartTime: block.timestamp,
+            decayEndTime: block.timestamp + 100,
+            exclusiveFiller: address(0),
+            exclusivityOverrideBps: 300,
+            input: DutchInput(tokenIn, amountIn, amountIn),
+            outputs: OutputsBuilder.singleDutch(tokenIn, amountOut * 2, amountOut * 2, recipient)
+        });
+
+        bytes memory sig = signOrder(swapperPrivateKey, address(permit2), order);
+        SignedOrder memory signedOrder = SignedOrder(abi.encode(order), sig);
+
+        vm.prank(address(reactor));
+        uint256 takerBalanceBefore = tokenOut.balanceOf(address(swapRouter02ExecutorNew));
+        swapRouter02ExecutorNew.execute(signedOrder, createProfitableBebopOrder());
+    }
+
+    function testWithdrawETH() public {
+        vm.deal(address(swapRouter02ExecutorNew), 1 ether);
+        uint256 balanceBefore = address(this).balance;
+        swapRouter02ExecutorNew.withdrawETH(address(this));
+        uint256 balanceAfter = address(this).balance;
+        assertEq(balanceAfter - balanceBefore, 1 ether);
+    }
+
+    function testWithdrawNotAuthorized() public {
+        vm.expectRevert('UNAUTHORIZED');
+        vm.prank(address(0xbeef));
+        swapRouter02ExecutorNew.withdrawETH(address(this));
     }
 }

@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.0;
 
-import {Owned} from "solmate/src/auth/Owned.sol";
-import {SafeTransferLib} from "solmate/src/utils/SafeTransferLib.sol";
-import {ERC20} from "solmate/src/tokens/ERC20.sol";
-import {WETH} from "solmate/src/tokens/WETH.sol";
-import {IReactorCallback} from "../interfaces/IReactorCallback.sol";
-import {IReactor} from "../interfaces/IReactor.sol";
-import {CurrencyLibrary} from "../lib/CurrencyLibrary.sol";
-import {ResolvedOrder, SignedOrder} from "../base/ReactorStructs.sol";
-import {ISwapRouter02} from "../external/ISwapRouter02.sol";
+import { Owned } from 'solmate/src/auth/Owned.sol';
+import { SafeTransferLib } from 'solmate/src/utils/SafeTransferLib.sol';
+import { ERC20 } from 'solmate/src/tokens/ERC20.sol';
+import { WETH } from 'solmate/src/tokens/WETH.sol';
+import { IReactorCallback } from '../interfaces/IReactorCallback.sol';
+import { IReactor } from '../interfaces/IReactor.sol';
+import { CurrencyLibrary } from '../lib/CurrencyLibrary.sol';
+import { ResolvedOrder, SignedOrder } from '../base/ReactorStructs.sol';
+import { ISwapRouter02 } from '../external/ISwapRouter02.sol';
 
 /// @notice A fill contract that uses SwapRouter02 to execute trades
 contract SwapRouter02Executor is IReactorCallback, Owned {
@@ -40,9 +40,12 @@ contract SwapRouter02Executor is IReactorCallback, Owned {
         _;
     }
 
-    constructor(address _whitelistedCaller, IReactor _reactor, address _owner, ISwapRouter02 _swapRouter02)
-        Owned(_owner)
-    {
+    constructor(
+        address _whitelistedCaller,
+        IReactor _reactor,
+        address _owner,
+        ISwapRouter02 _swapRouter02
+    ) Owned(_owner) {
         whitelistedCaller = _whitelistedCaller;
         reactor = _reactor;
         swapRouter02 = _swapRouter02;

@@ -71,8 +71,7 @@ contract SwapRouter02ExecutorNew is IReactorCallback, Owned {
         reactor.executeBatchWithCallback(orders, callbackData);
     }
 
-    function reactorCallback(ResolvedOrder[] calldata, bytes calldata callbackData) external onlyReactor {
-        // (address leftoverRecipient, bytes memory bebopCallbackData) = abi.decode(callbackData, (address, bytes));
+    function reactorCallback(ResolvedOrder[] calldata orders, bytes calldata callbackData) external onlyReactor {
         (
             address tokenIn,
             address tokenOut,
@@ -81,49 +80,23 @@ contract SwapRouter02ExecutorNew is IReactorCallback, Owned {
             uint256 filledTakerAmount
         ) = abi.decode(callbackData, (address, address, Order.Single, Signature.MakerSignature, uint256));
 
-        // (Order.Single memory order, Signature.MakerSignature memory makerSigx, uint256 filledTakerAmount) = abi.decode(
-        //     aggregatorData,
-        //     (Order.Single, Signature.MakerSignature, uint256)
-        // );
+        // leftover logic
+        if (orders.length > 0) {
+            uint256 dutchOrderAmount = orders[0].input.amount;
+            uint256 bebopTakerAmount = order.taker_amount;
 
-        if (tokenIn == address(0)) {
-            weth.deposit{ value: order.taker_amount }();
+            if (bebopTakerAmount > dutchOrderAmount) {
+                uint256 leftoverPositiveAmount = bebopTakerAmount - dutchOrderAmount;
+                ERC20(order.taker_token).transferFrom(order.taker_address, address(this), leftoverPositiveAmount);
+            }
+
+            if (dutchOrderAmount > bebopTakerAmount) {
+                uint256 leftoverNegativeAmount = dutchOrderAmount - bebopTakerAmount;
+                ERC20(order.taker_token).transfer(order.taker_address, leftoverNegativeAmount);
+            }
         }
 
-        bebop.swapSingle(order, makerSigx, 0);
-
-        // if (tokenOut == address(0)) {
-        //     weth.withdraw(weth.balanceOf(address(this)));
-        //     CurrencyLibrary.transferNative(address(reactor), order.maker_amount);
-        // } else {
-        //     ERC20(tokenOut).approve(address(reactor), order.maker_amount);
-        // }
-
-        // if (tokenIn == address(0)) {
-        //     uint256 leftoverETH = address(this).balance;
-        //     if (leftoverETH > 0) {
-        //         (bool success, ) = leftoverRecipient.call{ value: leftoverETH }('');
-        //         require(success, 'Leftover ETH transfer failed');
-        //     }
-        // } else {
-        //     uint256 leftoverIn = ERC20(tokenIn).balanceOf(address(this));
-        //     if (leftoverIn > 0) {
-        //         ERC20(tokenIn).transfer(leftoverRecipient, leftoverIn);
-        //     }
-        // }
-
-        // if (tokenOut == address(0)) {
-        //     uint256 leftoverETH = address(this).balance;
-        //     if (leftoverETH > 0) {
-        //         (bool success, ) = leftoverRecipient.call{ value: leftoverETH }('');
-        //         require(success, 'Leftover ETH transfer failed');
-        //     }
-        // } else {
-        //     uint256 leftoverOut = ERC20(tokenOut).balanceOf(address(this));
-        //     if (leftoverOut > 0) {
-        //         ERC20(tokenOut).transfer(leftoverRecipient, leftoverOut);
-        //     }
-        // }
+        bebop.swapSingle(order, makerSigx, filledTakerAmount);
     }
 
     /// @notice This function can be used to convert ERC20s to ETH that remains in this contract
